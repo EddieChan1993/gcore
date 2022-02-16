@@ -1,0 +1,9 @@
+
+*.xml
+*.iml
+*.log
+log/.log.json
+log/__debug_bin.log.json
+log/gcore.log.json
+.vscode/
+main.go
