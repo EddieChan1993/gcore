@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/EddieChan1993/gcore/glog"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -12,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"git.dhgames.cn/svr_comm/gcore/glog"
 )
 
 const (

@@ -1,8 +1,8 @@
 package consul_test
 
 import (
-	"github.com/gcore/consul"
-	"github.com/gcore/glog"
+	"github.com/EddieChan1993/gcore/consul"
+	"github.com/EddieChan1993/gcore/glog"
 )
 
 type dyConfig map[string]interface{}
