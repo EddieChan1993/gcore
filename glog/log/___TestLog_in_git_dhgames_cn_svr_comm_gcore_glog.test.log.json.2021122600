@@ -1,3 +1,0 @@
-{"log.level":"info","@timestamp":"2021-12-26T18:34:17+08:00","log.origin":{"file.name":"glog/glog_test.go","file.line":8},"message":"test info"}
-{"log.level":"warn","@timestamp":"2021-12-26T18:34:17+08:00","log.origin":{"file.name":"glog/glog_test.go","file.line":9},"message":"test info"}
-{"log.level":"error","@timestamp":"2021-12-26T18:34:17+08:00","log.origin":{"file.name":"glog/glog_test.go","file.line":10},"message":"test info"}

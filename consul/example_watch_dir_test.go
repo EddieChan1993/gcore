@@ -1,8 +1,8 @@
 package consul_test
 
 import (
-	"git.dhgames.cn/svr_comm/gcore/consul"
-	"git.dhgames.cn/svr_comm/gcore/glog"
+	"gcore/consul"
+	"gcore/glog"
 )
 
 type dirConfigs map[string]interface{}
