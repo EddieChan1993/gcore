@@ -1,4 +1,4 @@
-module git.dhgames.cn/svr_comm/gcore
+module gcore
 
 go 1.15
 
