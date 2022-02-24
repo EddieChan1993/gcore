@@ -1,7 +1,7 @@
 package gmetrics
 
 import (
-	"git.dhgames.cn/svr_comm/gcore/glog"
+	"github.com/gcore/glog"
 	"testing"
 )
 

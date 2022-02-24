@@ -1,7 +1,7 @@
 package gredis
 
 import (
-	"gcore/utils/cast"
+	"github.com/gcore/utils/cast"
 	"github.com/go-redis/redis"
 	"strings"
 )

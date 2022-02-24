@@ -1,8 +1,8 @@
 package consul_test
 
 import (
-	"gcore/consul"
-	"gcore/glog"
+	"github.com/gcore/consul"
+	"github.com/gcore/glog"
 )
 
 type dirConfigs map[string]interface{}

@@ -1,4 +1,4 @@
-module gcore
+module github.com/gcore
 
 go 1.15
 
