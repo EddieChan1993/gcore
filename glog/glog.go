@@ -7,7 +7,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"syscall"
 	"time"
 
 	"go.elastic.co/ecszap"
@@ -305,10 +304,7 @@ func initStderr() {
 	}
 
 	stdErrFileHandler = file
-	if err := syscall.Dup2(int(stdErrFileHandler.Fd()), int(os.Stderr.Fd())); err != nil {
-		Fatalw("failed to init stderr", "err", err)
-		panic(err)
-	}
+	redirectStderr(stdErrFileHandler)
 
 	// 内存回收前关闭文件描述符
 	runtime.SetFinalizer(stdErrFileHandler, func(fd *os.File) {
