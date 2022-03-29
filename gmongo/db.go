@@ -2,16 +2,16 @@ package gmongo
 
 import (
 	"context"
+	"github.com/EddieChan1993/gcore/glog"
 	"github.com/qiniu/qmgo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 var GDb *mongoDb
 
 const uri = "mongodb://localhost:27017"
-const dbName = "hatgame"
+const dbName = "demo"
 
 type mongoDb qmgo.Database
 
@@ -27,7 +27,7 @@ type IDao interface {
 	Bson() bson.M           //非主键字段
 }
 
-func InitDb(ctx context.Context) {
+func InitDb(ctx context.Context, ops ...Option) {
 	if ctx == nil {
 		ctx = context.TODO()
 	}
@@ -37,13 +37,20 @@ func InitDb(ctx context.Context) {
 	//	Uri:      consul.ConfigCenter.GetConfig("mongo").GetString("url"),
 	//	Database: consul.ConfigCenter.GetConfig("db").GetString(os.Getenv(env.SERVER_ID)),
 	//}
+	var opObj = &options{
+		dbName: dbName,
+		url:    uri,
+	}
+	for _, op := range ops {
+		op.apply(opObj)
+	}
 	conf := &qmgo.Config{
-		Uri:      uri,
-		Database: dbName,
+		Uri:      opObj.url,
+		Database: opObj.dbName,
 	}
 	client, err := qmgo.NewClient(ctx, conf)
 	if err != nil {
-		log.Panic(err)
+		glog.Panic(err)
 	}
 	//gDb = client.Database(consul.ConfigCenter.GetConfig("db").GetString(os.Getenv(env.SERVER_ID)))
 	GDb = (*mongoDb)(client.Database(dbName))
