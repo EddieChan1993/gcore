@@ -5,8 +5,9 @@ import (
 )
 
 func TestLog(t *testing.T) {
+	ResetToDevelopment()
 	Infof("test info")
 	Warnf("test info")
 	Errorf("test info")
-	panic("test panic")
+	//panic("test panic")
 }

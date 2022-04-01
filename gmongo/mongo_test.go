@@ -10,7 +10,11 @@ import (
 func TestMongodb(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	InitDb(ctx, WithUrl("127.0.0.1"), WithDbName("hat"))
+	InitDb(ctx, WithUrl("mongodb://localhost:27017"), WithDbName("hat"))
+	err := GDb.CreateCollect(ctx, "user")
+	if err != nil {
+		log.Fatal(err)
+	}
 	res := &User{RoleId: 1233}
 	isExtra, errMongo := GDb.FindOne(ctx, res)
 	if errMongo != nil {

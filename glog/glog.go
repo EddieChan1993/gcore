@@ -82,10 +82,13 @@ func Reset(logLevel Level, logFormat Format, logReceiver Receiver, logFileName s
 	format = logFormat
 	receiver = logReceiver
 	fileName = logFileName
-
-	callerOption := zap.AddCaller()
+	//callerOption := zap.AddCaller()
+	//if logLevel == InfoLevel {
+	callerOption := zap.AddStacktrace(zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.Level(logLevel)
+	}))
 	callerSkip := zap.AddCallerSkip(1)
-
+	//}
 	logger = zap.New(core, callerOption, callerSkip).Sugar()
 	return nil
 }

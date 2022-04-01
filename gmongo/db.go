@@ -3,7 +3,6 @@ package gmongo
 import (
 	"context"
 	"errors"
-	"github.com/EddieChan1993/gcore/glog"
 	"github.com/qiniu/qmgo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -59,7 +58,7 @@ func InitDb(ctx context.Context, ops ...Option) {
 	}
 	client, err := qmgo.NewClient(ctx, conf)
 	if err != nil {
-		glog.Panic(err)
+		panic(err)
 	}
 	GDb = (*mongoDb)(unsafe.Pointer(client.Database(dbName)))
 }
