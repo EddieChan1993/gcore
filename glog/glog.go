@@ -30,8 +30,9 @@ const (
 type Format int
 
 const (
-	Json Format = iota + 1
-	Human
+	Json  Format = iota + 1 //json格式输出
+	Human                   //人性化输出
+	HumanJson
 )
 
 type Receiver int
@@ -82,13 +83,8 @@ func Reset(logLevel Level, logFormat Format, logReceiver Receiver, logFileName s
 	format = logFormat
 	receiver = logReceiver
 	fileName = logFileName
-	//callerOption := zap.AddCaller()
-	//if logLevel == InfoLevel {
-	callerOption := zap.AddStacktrace(zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl >= zapcore.Level(logLevel)
-	}))
 	callerSkip := zap.AddCallerSkip(1)
-	//}
+	callerOption := zap.AddCaller()
 	logger = zap.New(core, callerOption, callerSkip).Sugar()
 	return nil
 }
@@ -231,8 +227,14 @@ func createEncoder(format Format) (zapcore.Encoder, error) {
 		encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000Z0700")
 		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		encoderConfig.ConsoleSeparator = " | "
-		encoderConfig.FunctionKey = "func"
+		encoderConfig.FunctionKey = ""
+		encoderConfig.CallerKey = ""
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
+	case HumanJson:
+		encoderConfig := zap.NewDevelopmentEncoderConfig()
+		encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+		encoderConfig.FunctionKey = "func"
+		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	default:
 		return nil, fmt.Errorf("unkown format %v", format)
 	}
@@ -259,6 +261,18 @@ func createWriteSyncer(encoder zapcore.Encoder, receiver Receiver, fileName stri
 		core := zapcore.NewCore(encoder, writeSyncer, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return lvl >= zapLevel
 		}))
+		warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+			return lvl >= zapcore.WarnLevel
+		})
+		warnWriter := stdErrFileHandler
+		encoderJson, err := createEncoder(HumanJson)
+		if err != nil {
+			return nil, err
+		}
+		core = zapcore.NewTee(
+			core,
+			zapcore.NewCore(encoderJson, zapcore.AddSync(warnWriter), warnLevel),
+		)
 		return core, nil
 	case File:
 		// 实现两个判断日志等级的interface (其实 zapcore.*Level 自身就是 interface)

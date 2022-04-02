@@ -6,8 +6,8 @@ import (
 
 func TestLog(t *testing.T) {
 	ResetToDevelopment()
-	Infof("test info")
-	Warnf("test info")
-	Errorf("test info")
+	Infof("test Infof")
+	Warnf("test Warnf")
+	Errorf("test Errorf")
 	//panic("test panic")
 }
