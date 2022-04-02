@@ -9,5 +9,6 @@ func TestLog(t *testing.T) {
 	Infof("test Infof")
 	Warnf("test Warnf")
 	Errorf("test Errorf")
+	Panic("test Errorf")
 	//panic("test panic")
 }

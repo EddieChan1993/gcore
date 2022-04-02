@@ -32,7 +32,6 @@ type Format int
 const (
 	Json  Format = iota + 1 //json格式输出
 	Human                   //人性化输出
-	HumanJson
 )
 
 type Receiver int
@@ -230,11 +229,6 @@ func createEncoder(format Format) (zapcore.Encoder, error) {
 		encoderConfig.FunctionKey = ""
 		encoderConfig.CallerKey = ""
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
-	case HumanJson:
-		encoderConfig := zap.NewDevelopmentEncoderConfig()
-		encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
-		encoderConfig.FunctionKey = "func"
-		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	default:
 		return nil, fmt.Errorf("unkown format %v", format)
 	}
@@ -261,11 +255,12 @@ func createWriteSyncer(encoder zapcore.Encoder, receiver Receiver, fileName stri
 		core := zapcore.NewCore(encoder, writeSyncer, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return lvl >= zapLevel
 		}))
+		//warning和error在console模式下打印到文件
 		warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return lvl >= zapcore.WarnLevel
 		})
 		warnWriter := stdErrFileHandler
-		encoderJson, err := createEncoder(HumanJson)
+		encoderJson, err := createEncoder(Json)
 		if err != nil {
 			return nil, err
 		}
