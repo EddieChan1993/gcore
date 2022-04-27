@@ -298,17 +298,10 @@ func initStderr() {
 		panic(err)
 	}
 
-	if runtime.GOOS == "windows" {
-		return
-	}
-
 	exeName := strings.Split(os.Args[0], "/")
 	fileName := exeName[len(exeName)-1]
 
 	stdErrFile := "./log/" + fileName + ".error.json"
-	if runtime.GOOS == "windows" {
-		return
-	}
 
 	file, err := os.OpenFile(stdErrFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
