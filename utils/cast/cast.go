@@ -1,5 +1,7 @@
 package cast
 
+import "unsafe"
+
 // ToBool 转换 interface 到 bool
 func ToBool(i interface{}) bool {
 	v, _ := ToBoolE(i)
@@ -82,4 +84,11 @@ func ToFloat32(i interface{}) float32 {
 func ToString(i interface{}) string {
 	v, _ := ToStringE(i)
 	return v
+}
+
+func String2bytes(s string) []byte {
+	return *(*[]byte)(unsafe.Pointer(&s))
+}
+func Bytes2string(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
 }
