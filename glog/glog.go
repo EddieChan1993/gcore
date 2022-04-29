@@ -297,7 +297,9 @@ func initStderr() {
 	if err := os.MkdirAll("./log", os.ModePerm); err != nil {
 		panic(err)
 	}
-
+	if runtime.GOOS == "windows" {
+		return
+	}
 	exeName := strings.Split(os.Args[0], "/")
 	fileName := exeName[len(exeName)-1]
 
