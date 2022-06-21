@@ -2,12 +2,14 @@ package glog
 
 import (
 	"fmt"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"io"
 	"os"
 	"runtime"
 	"strings"
+	"syscall"
 	"time"
+
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 
 	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
@@ -30,8 +32,8 @@ const (
 type Format int
 
 const (
-	Json  Format = iota + 1 //json格式输出
-	Human                   //人性化输出
+	Json Format = iota + 1
+	Human
 )
 
 type Receiver int
@@ -82,8 +84,10 @@ func Reset(logLevel Level, logFormat Format, logReceiver Receiver, logFileName s
 	format = logFormat
 	receiver = logReceiver
 	fileName = logFileName
-	callerSkip := zap.AddCallerSkip(1)
+
 	callerOption := zap.AddCaller()
+	callerSkip := zap.AddCallerSkip(1)
+
 	logger = zap.New(core, callerOption, callerSkip).Sugar()
 	return nil
 }
@@ -226,8 +230,7 @@ func createEncoder(format Format) (zapcore.Encoder, error) {
 		encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000Z0700")
 		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		encoderConfig.ConsoleSeparator = " | "
-		encoderConfig.FunctionKey = ""
-		encoderConfig.CallerKey = ""
+		encoderConfig.FunctionKey = "func"
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
 	default:
 		return nil, fmt.Errorf("unkown format %v", format)
@@ -255,19 +258,6 @@ func createWriteSyncer(encoder zapcore.Encoder, receiver Receiver, fileName stri
 		core := zapcore.NewCore(encoder, writeSyncer, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return lvl >= zapLevel
 		}))
-		//warning和error在console模式下打印到文件
-		warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-			return lvl >= zapcore.WarnLevel
-		})
-		warnWriter := stdErrFileHandler
-		encoderJson, err := createEncoder(Json)
-		if err != nil {
-			return nil, err
-		}
-		core = zapcore.NewTee(
-			core,
-			zapcore.NewCore(encoderJson, zapcore.AddSync(warnWriter), warnLevel),
-		)
 		return core, nil
 	case File:
 		// 实现两个判断日志等级的interface (其实 zapcore.*Level 自身就是 interface)
@@ -297,13 +287,18 @@ func initStderr() {
 	if err := os.MkdirAll("./log", os.ModePerm); err != nil {
 		panic(err)
 	}
+
 	if runtime.GOOS == "windows" {
 		return
 	}
+
 	exeName := strings.Split(os.Args[0], "/")
 	fileName := exeName[len(exeName)-1]
 
 	stdErrFile := "./log/" + fileName + ".error.json"
+	if runtime.GOOS == "windows" {
+		return
+	}
 
 	file, err := os.OpenFile(stdErrFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -311,7 +306,10 @@ func initStderr() {
 	}
 
 	stdErrFileHandler = file
-	redirectStderr(stdErrFileHandler)
+	if err := syscall.Dup2(int(stdErrFileHandler.Fd()), int(os.Stderr.Fd())); err != nil {
+		Fatalw("failed to init stderr", "err", err)
+		panic(err)
+	}
 
 	// 内存回收前关闭文件描述符
 	runtime.SetFinalizer(stdErrFileHandler, func(fd *os.File) {
@@ -323,8 +321,12 @@ func getWriter(filename string) io.Writer {
 	// 生成 rotatelogs 的Logger 实际生成的文件名 xxx.log.YYmmddHH
 	// xxx.log是指向最新日志的链接
 	// 保存30天内的日志，每24小时(整点)分割一次日志
+	newFileName := filename + ".%Y%m%d"
+	if len(filename) > 9 && filename[len(filename)-9:] == ".log.json" {
+		newFileName = filename[:len(filename)-9] + ".%Y%m%d" + ".log.json"
+	}
 	hook, err := rotatelogs.New(
-		filename+".%Y%m%d%H", // 没有使用go风格反人类的format格式
+		newFileName,
 		rotatelogs.WithLinkName(filename),
 		rotatelogs.WithMaxAge(30*24*time.Hour),
 		rotatelogs.WithRotationTime(24*time.Hour),

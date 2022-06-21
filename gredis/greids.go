@@ -1,9 +1,18 @@
 package gredis
 
 import (
-	"github.com/go-redis/redis"
+	"fmt"
 	"time"
+
+	"github.com/go-redis/redis"
 )
+
+func Init(url string) {
+	_, err := getClient(url)
+	if err != nil {
+		panic(fmt.Sprintf("redis URL:%s init err:%v", url, err))
+	}
+}
 
 func Get(url string, key string) (*redis.StringCmd, error) {
 	cli, err := getClient(url)
@@ -19,6 +28,11 @@ func Set(url string, key string, value interface{}, expiration time.Duration) (*
 		return nil, err
 	}
 	return cli.Set(key, value, expiration), nil
+}
+
+// GetClient 也可以自己封装
+func GetClient(url string) (*Client, error) {
+	return getClient(url)
 }
 
 // ------------------------------------------------------

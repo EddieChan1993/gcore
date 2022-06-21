@@ -36,7 +36,11 @@ func buildConfigUrl(baseUrl string, ser *ServiceInfo) string {
 	return fmt.Sprintf("%s%s/%s/%d?raw=true", baseUrl, ser.Cluster, ser.Service, ser.Index)
 }
 
-func buildDynamaicDirUrl(dirURL string) string {
+func buildDynamicDirUrl(dirURL string) string {
+	return fmt.Sprintf("%s%s", url_dynamicConfig, dirURL)
+}
+
+func buildDynamicWatchDirUrl(dirURL string) string {
 	if len(dirURL) != 0 && dirURL[len(dirURL)-1] == '/' {
 		dirURL = dirURL[:len(dirURL)-1]
 	}

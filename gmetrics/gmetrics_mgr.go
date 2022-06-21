@@ -3,7 +3,7 @@ package gmetrics
 import (
 	"bytes"
 	"encoding/json"
-	"git.dhgames.cn/svr_comm/gcore/glog"
+	"github.com/EddieChan1993/gcore/glog"
 	"net/http"
 )
 

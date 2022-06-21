@@ -2,46 +2,51 @@ package gredis
 
 import (
 	"github.com/EddieChan1993/gcore/utils/cast"
-	"github.com/go-redis/redis"
 	"strings"
+	"sync"
+
+	"github.com/go-redis/redis"
 )
 
 type Client struct {
-	c *redis.Client
+	*redis.Client
 }
 
+var lock = sync.RWMutex{}
 var clients = map[string]*Client{}
 
-func getClient(url string) (*redis.Client, error) {
-	if cli, ok := clients[url]; ok {
-		return cli.c, nil
-	} else {
-		if err := newClient(url); err != nil {
-			return nil, err
-		}
-		cli, _ = clients[url]
-		return cli.c, nil
+func getClient(url string) (*Client, error) {
+	lock.RLock()
+	client, ok := clients[url]
+	lock.RUnlock()
+	if ok {
+		return client, nil
 	}
+
+	client, err := newClient(url)
+	if err != nil {
+		return nil, err
+	}
+	lock.Lock()
+	clients[url] = client
+	lock.Unlock()
+	return client, nil
 }
 
-func newClient(url string) error {
-	if clients[url] != nil {
-		return nil
-	}
+func newClient(url string) (*Client, error) {
 	password, host, db := parseURL(url)
 	redisOption := &redis.Options{
 		Addr:     host,
 		DB:       db,
 		Password: password,
 	}
-	client := redis.NewClient(redisOption)
-	err := client.Ping().Err()
+	c := redis.NewClient(redisOption)
+	err := c.Ping().Err()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	clients[url] = &Client{c: client}
-	return nil
+	return &Client{c}, nil
 }
 
 func parseURL(url string) (string, string, int) {

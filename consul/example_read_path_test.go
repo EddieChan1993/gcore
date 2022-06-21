@@ -1,8 +1,8 @@
 package consul_test
 
 import (
-	"github.com/EddieChan1993/gcore/consul"
-	"github.com/EddieChan1993/gcore/glog"
+	"git.dhgames.cn/svr_comm/gcore/consul"
+	"git.dhgames.cn/svr_comm/gcore/glog"
 )
 
 type config2 map[string]interface{}

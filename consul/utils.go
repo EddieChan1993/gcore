@@ -62,12 +62,14 @@ func blockQuery(url string, config IConfig) {
 			continue
 		}
 
-		if err = json.Unmarshal(body, config); err != nil {
+		newConfig := config.New()
+		if err = json.Unmarshal(body, newConfig); err != nil {
 			glog.Warnw("fail to block query config", "err", err)
 			continue
 		}
 
-		config.Reload()
+		newConfig.Reload()
+
 		oldBytes = body
 	}
 }
@@ -102,14 +104,21 @@ func blockQueryDir(url string, config IMutiConfig) {
 			data  []byte
 		}
 		kvs := []kv{}
-		if err = json.Unmarshal(body, &kvs); err != nil {
-			glog.Warnw("fail to block query dir", "err", err)
-			continue
+		if bytes.Equal(body, []byte{}) {
+			glog.Warnw("block query dir empty body")
+		} else {
+			if err = json.Unmarshal(body, &kvs); err != nil {
+				glog.Warnw("fail to block query dir", "err", err)
+				continue
+			}
 		}
 
+		// 遍历新的kv，如果版本变更，表示有改动。
+		newIndexes := map[string]int64{}
 		for _, v := range kvs {
 			i := strings.LastIndex(v.Key, "/")
 			key := v.Key[i+1:]
+			newIndexes[key] = v.Index
 			if keyIndexs[key] == v.Index {
 				continue
 			}
@@ -121,8 +130,14 @@ func blockQueryDir(url string, config IMutiConfig) {
 			keyIndexs[key] = v.Index
 			config.Reload(key, v.data)
 		}
+		for k := range keyIndexs {
+			if newIndexes[k] == 0 {
+				config.Delete(k)
+			}
+		}
 
 		oldBytes = body
+		keyIndexs = newIndexes
 	}
 }
 
@@ -180,9 +195,13 @@ func readDir(url string, config IMutiConfig) error {
 		data  []byte
 	}
 	kvs := []kv{}
-	if err = json.Unmarshal(body, &kvs); err != nil {
-		glog.Warnw("fail to block query config", "err", err)
-		return err
+	if bytes.Equal(body, []byte{}) {
+		glog.Warnw("block query dir empty body")
+	} else {
+		if err = json.Unmarshal(body, &kvs); err != nil {
+			glog.Warnw("fail to block query config", "err", err)
+			return err
+		}
 	}
 
 	for _, v := range kvs {

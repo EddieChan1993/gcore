@@ -20,6 +20,8 @@ package consul
 type IConfig interface {
 	// Reload 注意，该方法是在IConfig值被成功更新之后调用
 	Reload()
+	// New 创建一个IConfig用于json解码
+	New() IConfig
 }
 
 // IMutiConfig 多config配置接口，用在监听consul目录处。调用者需要实现realod方法，并在内部完成对数据的更新操作。
@@ -27,6 +29,7 @@ type IMutiConfig interface {
 	// 每该目录下有配置新增、修改、删除时，此方法会调用。
 	// key=配置的key值，比如：com.droidhang.aod.google
 	Reload(key string, data []byte)
+	Delete(key string)
 }
 
 // 服务信息
@@ -148,7 +151,7 @@ func UpdateDynamicConfigByService(ser *ServiceInfo, config interface{}) error {
 
 // 根据dir构成url更新动态配置
 func UpdateDynamicConfigByDir(dir string, config interface{}) error {
-	url := buildDynamaicDirUrl(dir)
+	url := buildDynamicDirUrl(dir)
 	return httpPut(url, config)
 }
 
@@ -159,7 +162,7 @@ func GetServiceInfoByPath() (service *ServiceInfo, err error) {
 
 // DeleteDynamicConfigByDir 通过dir删除动态配置
 func DeleteDynamicConfigByDir(dir string) error {
-	url := buildDynamaicDirUrl(dir)
+	url := buildDynamicDirUrl(dir)
 	return httpDelete(url)
 }
 
@@ -168,7 +171,7 @@ func DeleteDynamicConfigByDir(dir string) error {
 // config 在配置更新时不会自动修改，需要调用者自己实现更新方法
 // 如果返回error，watch不会启动。否则会立即刷新所有配置，并开始监控。
 func WatchDir(dirURL string, config IMutiConfig) error {
-	url := buildDynamaicDirUrl(dirURL)
+	url := buildDynamicWatchDirUrl(dirURL)
 	if err := readDir(url, config); err != nil {
 		return err
 	}

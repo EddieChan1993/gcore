@@ -1,7 +1,7 @@
 package gmetrics
 
 import (
-	"github.com/gcore/glog"
+	"github.com/EddieChan1993/gcore/glog"
 	"testing"
 )
 
