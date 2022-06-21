@@ -317,6 +317,10 @@ func initStderr() {
 	})
 }
 
+func GetLogger() *zap.SugaredLogger {
+	return logger
+}
+
 func getWriter(filename string) io.Writer {
 	// 生成 rotatelogs 的Logger 实际生成的文件名 xxx.log.YYmmddHH
 	// xxx.log是指向最新日志的链接
