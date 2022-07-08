@@ -13,10 +13,11 @@ var (
 	ErrLength = errors.New("param length is need to be greater than 0")
 	ErrWeight = errors.New("wieght slice element need to be greater than 0")
 
-	stdStrCommon    = "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
-	stdStrLowercase = "abcdefghijklmnopqrstuvwsyz"
-	stdStrUpercase  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	stdStrDigit     = "0123456789"
+	stdStrCommon      = "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
+	stdStrLowercase   = "abcdefghijklmnopqrstuvwsyz"
+	stdStrUpercase    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	stdStrDigit       = "0123456789"
+	stdStrDigitNoZero = "123456789"
 )
 
 const (
@@ -39,6 +40,11 @@ func RandString(length int) (string, error) {
 // RandDigitString 生成纯数字字符串
 func RandDigitString(length int) (string, error) {
 	return randstr(&stdStrDigit, length)
+}
+
+// RandDigitString 生成纯数字非0字符串
+func RandDigitStringNoZero(length int) (string, error) {
+	return randstr(&stdStrDigitNoZero, length)
 }
 
 // RandUpercaseString 生成大写字符串
