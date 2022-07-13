@@ -60,7 +60,7 @@ func InitDb(ctx context.Context, ops ...Option) {
 	if err != nil {
 		panic(err)
 	}
-	GDb = (*mongoDb)(unsafe.Pointer(client.Database(dbName)))
+	GDb = (*mongoDb)(client.Database(dbName))
 }
 
 func (this_ *mongoDb) GetDb() *qmgo.Database {
