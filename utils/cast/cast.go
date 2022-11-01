@@ -1,6 +1,10 @@
 package cast
 
-import "unsafe"
+import (
+	"math"
+	"runtime"
+	"unsafe"
+)
 
 // ToBool 转换 interface 到 bool
 func ToBool(i interface{}) bool {
@@ -91,4 +95,67 @@ func String2bytes(s string) []byte {
 }
 func Bytes2string(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+//Cal64Safe 安全加减运算
+//num计算结果
+//isOver是否溢出
+func Cal64Safe(left, right int64) (num int64, isOver bool) {
+	if right > 0 {
+		if left > math.MaxInt64-right {
+			return 0, true
+		}
+	} else {
+		if left < math.MinInt64-right {
+			return 0, true
+		}
+	}
+	return left + right, false
+}
+
+//Cal32Safe 安全加减运算
+//num计算结果
+//isOver是否溢出
+func Cal32Safe(left, right int32) (num int32, isOver bool) {
+	if right > 0 {
+		if left > math.MaxInt32-right {
+			return 0, true
+		}
+	} else {
+		if left < math.MinInt32-right {
+			return 0, true
+		}
+	}
+	return left + right, false
+}
+
+//PanicStack 捕获recover的panic堆栈
+func PanicStack() {
+	buf := make([]byte, 1<<10)
+	runtime.Stack(buf, true)
+}
+
+//MapMergeSum map合并，值累加
+func MapMergeSum(base, add map[int32]int64) map[int32]int64 {
+	if len(base) == 0 {
+		return add
+	}
+	for k, v := range add {
+		if old, had := base[k]; had {
+			base[k] = old + v
+		} else {
+			base[k] = v
+		}
+	}
+	return base
+}
+
+//SliceIsMember slice中是否包含该元素
+func SliceIsMember(s []int32, e int32) bool {
+	for _, i := range s {
+		if e == i {
+			return true
+		}
+	}
+	return false
 }
