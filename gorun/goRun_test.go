@@ -1,4 +1,4 @@
-package goRun
+package gorun
 
 import (
 	"context"
@@ -11,7 +11,7 @@ func TestGoRun(t *testing.T) {
 	InitGoRuntime()
 	for i := 0; i < 100; i++ {
 		tmp := i
-		GoRun(func(ctx context.Context) {
+		Go(func(ctx context.Context) {
 			ticker := time.NewTicker(3 * time.Second)
 			defer func() {
 				ticker.Stop()

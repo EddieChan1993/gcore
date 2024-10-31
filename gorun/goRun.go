@@ -1,4 +1,4 @@
-package goRun
+package gorun
 
 import (
 	"context"
@@ -24,7 +24,7 @@ func InitGoRuntime() {
 	}
 }
 
-func GoRun(fn func(ctx context.Context)) {
+func Go(fn func(ctx context.Context)) {
 	goRuntime.wg.Add(1)
 	go func() {
 		defer func() {
